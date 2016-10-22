@@ -41,6 +41,7 @@ var clock = new THREE.Clock();
 var angle = 0;
 var mesh, boat;
 var homeOn = false;
+var scalar = 4;
 init();
 animate();
 
@@ -63,14 +64,14 @@ function init() {
 
   controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-  //////////////////////
-
+  ////////////////////// 
+  
   var geometry = new THREE.Geometry();
   // add vertices
-  geometry.vertices.push(new THREE.Vector3(10, 0, 0));
-  geometry.vertices.push(new THREE.Vector3(-10, 0, 0));
-  geometry.vertices.push(new THREE.Vector3(0, 10, 0));
-  geometry.vertices.push(new THREE.Vector3(0, 0, -20));
+  geometry.vertices.push(new THREE.Vector3(2.1*scalar, 0, 0));
+  geometry.vertices.push(new THREE.Vector3(-2.1*scalar, 0, 0));
+  geometry.vertices.push(new THREE.Vector3(0, 2.4*scalar, 0));
+  geometry.vertices.push(new THREE.Vector3(0, 0, -6*scalar));
 
   // add faces
   geometry.faces.push(new THREE.Face3(1, 2, 3));
@@ -95,7 +96,7 @@ function init() {
   boat = new THREE.Object3D();
   boat.add(mesh);
   scene.add(boat);
-  //main
+  //boat is main object
 
 
   pos = new THREE.Vector3();
@@ -107,24 +108,26 @@ function init() {
 
 
 function computeForce() {
-  // engine force
+  
   keyboard.update();
-
+  
   if (keyboard.down("home")) {
     homeOn = true;
+	// engine switch
   }
+  
   if (homeOn) {
     if (keyboard.down("space")) {
       vel.set(0, 0, 0);
       force = new THREE.Vector3(0, 0, 0);
     } else if (keyboard.pressed("up")) {
-      force = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), angle).multiplyScalar(20);
+      force = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), angle).multiplyScalar(25);
     } else if (keyboard.pressed("down")) {
-      force = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), angle).multiplyScalar(-20);
+      force = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), angle).multiplyScalar(-25);
     } else if (keyboard.pressed("left")) {
-      force = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), angle + 1.5).multiplyScalar(20);
+      force = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), angle + 1.30).multiplyScalar(25);
     } else if (keyboard.pressed("right")) {
-      force = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), angle - 1.5).multiplyScalar(20);
+      force = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), angle - 1.30).multiplyScalar(25);
     } else force = new THREE.Vector3(0, 0, 0);
   } else
     force = new THREE.Vector3(0, 0, 0);
@@ -140,11 +143,6 @@ function animate() {
 
   var dt = clock.getDelta(); // delta-time
   // vel = vel + force/mass * dt
-  /*var temp = new THREE.Vector3(0,0,0);
-  temp.add(force.clone().multiplyScalar(dt / mass));
-  if(vel.length() - temp.length() < 0)
-  	vel.set(0,0,0);
-  else*/
   vel.add(force.clone().multiplyScalar(dt / mass));
   // pos = pos + vel * dt
   pos.add(vel.clone().multiplyScalar(dt));
