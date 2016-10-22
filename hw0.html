@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<style>
+	body{
+		overflow: hidden
+	}
+</style>
+</head>
+
+<body> 
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r78/three.min.js"></script>
+<script src="https://dl.dropboxusercontent.com/u/3587259/Code/Threejs/OrbitControls.js">
+</script>
+
+<script>
+
+var renderer, scene, camera;
+var controls, cube, cube2;
+var angle = 0;
+
+init();
+animate();
+
+function init () {
+	
+	renderer = new THREE.WebGLRenderer();
+	
+	renderer.setClearColor (0xAAAAAA);
+	
+	document.body.appendChild (renderer.domElement);
+	var width = window.innerWidth;
+	var height = window.innerHeight;
+	renderer.setSize (width, height);
+
+	scene = new THREE.Scene();
+	var grid = new THREE.GridHelper(10,1);
+	scene.add (grid);
+	var axes = new THREE.AxisHelper (10);
+	scene.add (axes);
+	
+	camera = new THREE.PerspectiveCamera (35, width/height, 1, 100);
+	camera.position.y = 16;
+	camera.position.z = 40;
+	camera.lookAt (new THREE.Vector3(0,0,0));
+	
+	///////////////////////////////////////////////////////
+	var cubeGeometry = new THREE.BoxGeometry(3.8,1.2,6.8);
+	var cubeMaterial = new THREE.MeshNormalMaterial();
+	cube = new THREE.Mesh (cubeGeometry,cubeMaterial);
+	cube.position.y = 0.6;
+	
+	
+	var geometry2 = new THREE.CylinderGeometry( 1, 1, 2.2);
+	var material2 = new THREE.MeshNormalMaterial();
+	var cube2 = new THREE.Mesh( geometry2, material2 );
+	cube2.position.z = -(3.4-1);
+	cube2.position.y = 1.1+0.6;
+	
+	cube.add(cube2);
+	scene.add(cube);
+	
+	controls = new THREE.OrbitControls(camera, renderer.domElement);
+	
+}
+
+function animate() {
+
+	angle += 0.01;
+	cube.position.set(8*Math.cos(-angle), 0.6, 8*Math.sin(-angle));
+	cube.rotation.y = angle;
+	controls.update();
+	requestAnimationFrame(animate);
+	render();
+	
+}
+
+function render() {
+	
+	renderer.render(scene, camera);
+	
+}
+
+
+</script>
+</body>
+
+</html>
