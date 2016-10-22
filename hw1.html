@@ -131,7 +131,7 @@ function computeForce() {
     } else force = new THREE.Vector3(0, 0, 0);
   } else
     force = new THREE.Vector3(0, 0, 0);
-  //對Y軸做
+  
 
   // resistance force
   var alpha = 0.50;
@@ -154,7 +154,7 @@ function animate() {
 
 
   boat.rotation.y = angle - Math.PI / 2;
-  // copy to cylinder
+  // copy to boat
   boat.position.copy(pos);
 
   controls.update();
