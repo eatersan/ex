@@ -33,7 +33,6 @@ body {
 
 <script>
 
-
 var camera, scene, renderer;
 var satellite, angle = 0;
 var mousePoint;
@@ -169,7 +168,7 @@ function animate() {
   var dt = clock.getDelta();
   
   // force: add gravity first
-  if (keyboard.down("space") && vel.y <= 0.001 && vel.y>= -0.001) {
+  if (keyboard.down("space") && pos.y <= ballR+0.1) {
   	vel.add(new THREE.Vector3(0, 70, 0));
     force = new THREE.Vector3(0, 0, 0);
   }
@@ -197,7 +196,7 @@ function animate() {
     */
   // bounce back
   if (pos.y <= ballR) {
-    //pos.y = 0;
+    pos.y = 0+ballR;
     vel.y *= -0.7;
   }
   
@@ -208,6 +207,7 @@ function animate() {
 function render() {
   renderer.render(scene, camera);
 }
+
 
 
 </script>
