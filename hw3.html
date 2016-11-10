@@ -336,7 +336,7 @@ function animate() {
 	
   checkLimit();
   
-  if (keyboard.down("space")) {
+  if (keyboard.down("space") && vel.y == 0) {
     vel.y = 70;
     counter = 0;
     force = new THREE.Vector3(0, 0, 0);
