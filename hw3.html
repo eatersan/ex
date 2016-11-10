@@ -59,7 +59,7 @@ var xMin = 20, xMax = 90, yMin = 10, yMax = 20;
 var baseS = 0, count = 0;
 var arrow;
 var jump, down, soundTrack;
- 
+var p;
 
 var stArray = [];
 var planeWide =   [30, 40, 30, 30, 30, 60, 25, 15, 55, 55, 30, 30, 40, 30];
@@ -341,6 +341,7 @@ function animate() {
     counter = 0;
     force = new THREE.Vector3(0, 0, 0);
     jump.play();
+    p = 1;
   } else {
     // force: add gravity first
     force = new THREE.Vector3(0, -120, 0);
@@ -374,13 +375,16 @@ function animate() {
   if (pos.y <= ballR + height(pos.x)) {
     pos.y = ballR + height(pos.x);
     vel.y *= 0;
-    down.play();
+    if(p==1){
+    	down.play();
+      p = 0;
+    }
     counter++;
   }
 
 
 
-  arrow.position.x = ball.position.x;
+	arrow.position.x = ball.position.x;
   arrow.position.y = ball.position.y;
   arrow.position.y += 13;
   if(arrow.position.x >= coin.position.x) arrow.rotation.y = Math.PI;
@@ -395,6 +399,7 @@ function animate() {
 function render() {
   renderer.render(scene, camera);
 }
+
 
 </script>
 </body>
