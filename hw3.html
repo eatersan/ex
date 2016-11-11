@@ -13,6 +13,26 @@
   text-align: center;
   color: #ffff00
 }
+#s {
+  position: absolute;
+  border-style:none;
+  top: 0px;
+  left: 8%; 
+  width: 1%;
+  padding: 10px;
+  text-align: center;
+  color: #000000
+}
+
+#tex {
+  position: absolute;
+  border-style:none;
+  top: 0px;
+  width: 40px;
+  padding: 10px;
+  text-align: center;
+  color: #000000
+}
 
 body {
   overflow: hidden;
@@ -24,10 +44,18 @@ body {
 
 <div id="info">hw3
 </div>
+
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script>
 
 <script src="https://jyunming-chen.github.io/tutsplus/js/KeyboardState.js"></script>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js">
+</script>
+
+<input type="text" name = "s" id = "s"  value = "0"/>
+<input type="text" name = "tex" id = "tex"  value = "score"/>
 <audio id="soundtrack" autoplay loop style="display:none">
 <source src="sounds/hw3_bgm.mp3" type='audio/mp3'>
 
@@ -73,12 +101,6 @@ var planeNumber = 14;
 init();
 animate();
 
-/*
-function setTex(){
-	
-	
-}
-*/
 
 function setUpStArray() {
   for (var i = 0; i < 2; i++) {
@@ -125,7 +147,10 @@ function contactCoin(){
 	  var dis = computeDistance(ball, coin);
     var r, s;
   if (dis < ballR + coinR) {
-	eat_coin.play();
+    eat_coin.play();
+    score++;
+    $("#s").val(score);
+    
   	r = Math.floor(Math.random() * (xMax - xMin + 1)) + xMin;
   	s = (r%2) ? -1 : 1;
     
@@ -261,7 +286,8 @@ function init() {
   coin = new THREE.Mesh(new THREE.CircleGeometry(coinR, 20), new THREE.MeshBasicMaterial({map: texture}));
 	
   scene.add(coin);
-  coin.position.y = -10;
+  coin.position.y = -20;
+  coin.position.x = 250;
   
   //arrow
   textureArrow =				 THREE.ImageUtils.loadTexture('https://i.imgur.com/HBNy4BH.png');
@@ -437,7 +463,6 @@ function animate() {
 function render() {
   renderer.render(scene, camera);
 }
-
 
 
 </script>
