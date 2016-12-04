@@ -36,7 +36,6 @@ body {
 
 
 <script>
-
 var camera, scene, renderer, controls;
 var puck;
 var agent;
@@ -45,6 +44,8 @@ var targetCatch = false;
 var targetOmega = 0.3;
 var agNumber = 7;
 var obNumber = 4;
+var agPx = [60,-60,100,-100,90,-30,30];
+var agPz = [60,-60,80,-100,0,0,-20];
 
 var raycaster;
 var mouse = new THREE.Vector2();
@@ -64,13 +65,21 @@ var ifTouch = function(){
 	var i;
   for(i=0;i<agNumber;i++){
   	if(target.clone().sub(agents[i].pos).length() < 2){
+   	 /*
     	var x = Math.floor((Math.random() * 100) + 1);
       var z = Math.floor((Math.random() * 100) + 1);
       var sign = Math.floor((Math.random() * 100) + 1);
       if(sign%2 == 0) sign = 1;
 			else sign = -1;
-      puck.position.x = target.x = x;
-      puck.position.z = target.z = z; 
+      */
+      var j;
+      for(j=0;j<agNumber;j++){
+      	agents[j].mesh.position.x = agents[j].pos.x = agPx[j];
+        agents[j].mesh.position.z = agents[j].pos.z = agPz[j];
+      	
+      }
+      puck.position.x = target.x = 0;
+      puck.position.z = target.z = 0; 
       
     }
 	}
@@ -180,9 +189,9 @@ function init() {
   
   ///////////////////////
  
-  var ob = new THREE.Mesh (new THREE.CircleGeometry (30,20));
+  var ob = new THREE.Mesh (new THREE.CircleGeometry (20,20));
   ob.rotation.x = -Math.PI/2;
-  obstacles.push( new Obstacle( ob, new THREE.Vector3(20, 0, 60), 30) );
+  obstacles.push( new Obstacle( ob, new THREE.Vector3(20, 0, 60), 20) );
   scene.add (ob);
  
  	ob = new THREE.Mesh (new THREE.CircleGeometry (20,20));
@@ -192,12 +201,12 @@ function init() {
   
   ob = new THREE.Mesh (new THREE.CircleGeometry (15,20));
   ob.rotation.x = -Math.PI/2;
-  obstacles.push( new Obstacle( ob, new THREE.Vector3(-40, 0, 20), 15) );
+  obstacles.push( new Obstacle( ob, new THREE.Vector3(-40, 0, 30), 15) );
   scene.add (ob);
   
-  ob = new THREE.Mesh (new THREE.CircleGeometry (40,20));
+  ob = new THREE.Mesh (new THREE.CircleGeometry (25,20));
   ob.rotation.x = -Math.PI/2;
-  obstacles.push( new Obstacle( ob, new THREE.Vector3(-50, 0, -40), 40) );
+  obstacles.push( new Obstacle( ob, new THREE.Vector3(-50, 0, -40), 25) );
   scene.add (ob);
   
   
