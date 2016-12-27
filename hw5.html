@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<style>
+	body {
+	  background-color: #fff;
+	  color: #111;
+	  margin: 0px;
+	  overflow: hidden;
+	  font-family: Monospace;
+	  font-size: 20px;
+	}
+	
+	#info {
+	  position: absolute;
+	  top: 0px;
+	  width: 100%;
+	  padding: 5px;
+	  text-align: center;
+	  color: #ffff00
+	}
+	
+	a {
+	  color: #00ffff
+	}
+	
+	strong {
+	  color: red
+	}
+	
+	#container {
+	  z-index: 0;
+	  left: 0px;
+	  top: 0px;
+	  overflow: hidden;
+	  position: absolute;
+	  width: 100%;
+	  height: 100%;
+	}
+#gui {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    //height: 350px;
+}
+
+</style>
+
+
+
+</head>
+
+<body> 
+<div id="info">
+  Keyframe Setter
+  <br>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script>
+<script src="https://dl.dropboxusercontent.com/u/3587259/Code/Threejs/OrbitControls.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5.1/dat.gui.min.js"></script>
+
+<script>
+var scene, renderer, camera;
+var controls;
+var torso, lowerArm, upperArm;
+var leftLowerArm, leftUpperArm;
+var drum;
+var legL,legR;
+
+var clock = new THREE.Clock();
+var head;
+var gcontrols;
+var stickL,stickR;
+var dt = 0;
+/*
+var keys = [
+[0, [-.157, -.05, -.39, -1.68, 0]],
+[0.3, [-1.038, -1.15, 0.02, -2.01, -0.48]],
+[0.5, [0.453, 0.84, -2.38, -0.55, 0.25]],
+[0.75, [0.453, 0.84, -2.38, -0.55, 0.25]],
+[0.85, [-.157, -.05, -.39, -1.68, 0]],
+[1, [-.157, -.05, -.39, -1.68, 0]],
+];*/
+
+var keys = [
+[0.0, [-0.08, 0.028, -0.247, -2.136, 0.124, 0.096, -0.316, -2.07, 1.519]],
+[0.010, [-0.08, 0.028, -0.247, -2.136, 0.124, 0.096, -0.316, -2.07, 1.519]],
+
+[0.020, [-0.284, 0.508, -0.453, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+[0.025, [-0.284, 0.508, -0.453, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+
+[0.035, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+[0.040, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+
+
+[0.050, [-0.284, 0.508, -0.453, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+[0.055, [-0.284, 0.508, -0.453, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+
+[0.065, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+[0.070, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+
+
+[0.080, [-0.284, 0.508, -0.453, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+[0.085, [-0.284, 0.508, -0.453, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+
+[0.095, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+[0.100, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+[0.110, [-0.284, 0.508, -0.453, -0.807, 1.508, 1.208, -0.728, -0.807, 1.519]],
+[0.115, [-0.284, 0.508, -0.453, -0.807, 1.508, 1.208, -0.728, -0.807, 1.519]],
+//↑左手伸起
+
+[0.125, [-1.508, -1.208, -0.728, -0.807, 0.284, -0.508, -0.453, -0.807, 1.519]],
+[0.130, [-1.508, -1.208, -0.728, -0.807, 0.284, -0.508, -0.453, -0.807, 1.519]],
+
+[0.140, [-0.284, 0.508, -0.453, -0.807, 1.508, 1.208, -0.728, -0.807, 1.519]],
+[0.145, [-0.284, 0.508, -0.453, -0.807, 1.508, 1.208, -0.728, -0.807, 1.519]],
+
+[0.155, [-0.08, 0.028, -0.247, -2.136, 0.124, 0.096, -0.316, -2.07, 1.519]],
+[0.160, [-0.08, 0.028, -0.247, -2.136, 0.124, 0.096, -0.316, -2.07, 1.519]],
+
+//1-2
+[0.165, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+[0.170, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+
+[0.180, [-0.284, 0.508, -0.453, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+[0.185, [-0.284, 0.508, -0.453, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+
+
+[0.195, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+[0.200, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+
+[0.210, [-0.284, 0.508, -0.453, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+[0.215, [-0.284, 0.508, -0.453, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+
+
+[0.225, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+[0.230, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+
+//左起右打
+[0.240, [-0.284, 0.508, -0.453, -0.807, 1.508, 1.208, -0.728, -0.807, 1.519]],
+[0.245, [-0.284, 0.508, -0.453, -0.807, 1.508, 1.208, -0.728, -0.807, 1.519]],
+//右起左打
+[0.255, [-1.508, -1.208, -0.728, -0.807, 0.284, -0.508, -0.453, -0.807, 1.519]],
+[0.260, [-1.508, -1.208, -0.728, -0.807, 0.284, -0.508, -0.453, -0.807, 1.519]],
+//左起右打 轉圈
+[0.270, [-0.284, 0.508, -0.453, -0.807, 1.508, 1.208, -0.728, -0.807, 3.038]],
+[0.275, [-0.284, 0.508, -0.453, -0.807, 1.508, 1.208, -0.728, -0.807, 3.038]],
+
+//就位
+[0.280, [-0.08, 0.028, -0.247, -2.136, 0.124, 0.096, -0.316, -2.07, 3.038]],
+[0.285, [-0.08, 0.028, -0.247, -2.136, 0.124, 0.096, -0.316, -2.07, 3.038]],
+
+//1
+[0.295, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 3.038]],
+[0.300, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 3.038]],
+
+[0.310, [-0.284, 0.508, -0.453, -0.807, 0.124, 0.096, -0.316, -2.07, 3.038]],
+[0.315, [-0.284, 0.508, -0.453, -0.807, 0.124, 0.096, -0.316, -2.07, 3.038]],
+
+//2
+[0.325, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 3.038]],
+[0.330, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 3.038]],
+
+[0.340, [-0.284, 0.508, -0.453, -0.807, 0.124, 0.096, -0.316, -2.07, 3.038]],
+[0.345, [-0.284, 0.508, -0.453, -0.807, 0.124, 0.096, -0.316, -2.07, 3.038]],
+
+//3
+[0.355, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 3.038]],
+[0.360, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 3.038]],
+//左起右打
+[0.370, [-0.284, 0.508, -0.453, -0.807, 1.508, 1.208, -0.728, -0.807, 3.038]],
+[0.375, [-0.284, 0.508, -0.453, -0.807, 1.508, 1.208, -0.728, -0.807, 3.038]],
+
+//左打右起
+[0.385, [-1.508, -1.208, -0.728, -0.807, 0.284, -0.508, -0.453, -0.807, 3.038]],
+[0.390, [-1.508, -1.208, -0.728, -0.807, 0.284, -0.508, -0.453, -0.807, 3.038]],
+//左起右打 轉圈
+[0.400, [-0.284, 0.508, -0.453, -0.807, 1.508, 1.208, -0.728, -0.807, 4.557]],
+[0.405, [-0.284, 0.508, -0.453, -0.807, 1.508, 1.208, -0.728, -0.807, 4.557]],
+//就位
+[0.410, [-0.08, 0.028, -0.247, -2.136, 0.124, 0.096, -0.316, -2.07, 4.557]],
+[0.415, [-0.08, 0.028, -0.247, -2.136, 0.124, 0.096, -0.316, -2.07, 4.557]],
+
+
+//1
+[0.425, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 4.557]],
+[0.430, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 4.557]],
+
+[0.440, [-0.284, 0.508, -0.453, -0.807, 0.124, 0.096, -0.316, -2.07, 4.557]],
+[0.445, [-0.284, 0.508, -0.453, -0.807, 0.124, 0.096, -0.316, -2.07, 4.557]],
+
+//2
+[0.455, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 4.557]],
+[0.460, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 4.557]],
+
+[0.470, [-0.284, 0.508, -0.453, -0.807, 0.124, 0.096, -0.316, -2.07, 4.557]],
+[0.475, [-0.284, 0.508, -0.453, -0.807, 0.124, 0.096, -0.316, -2.07, 4.557]],
+
+//3
+[0.485, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 4.557]],
+[0.490, [-1.508, -1.208, -0.728, -0.807, 0.124, 0.096, -0.316, -2.07, 4.557]],
+
+[0.500, [-0.284, 0.508, -0.453, -0.807, 1.508, 1.208, -0.728, -0.807, 4.557]],
+[0.505, [-0.284, 0.508, -0.453, -0.807, 1.508, 1.208, -0.728, -0.807, 4.557]],
+
+//左打右起
+[0.515, [-1.508, -1.208, -0.728, -0.807, 0.284, -0.508, -0.453, -0.807, 4.557]],
+[0.520, [-1.508, -1.208, -0.728, -0.807, 0.284, -0.508, -0.453, -0.807, 4.557]],
+//左起右打 轉圈
+[0.530, [-0.284, 0.508, -0.453, -0.807, 1.508, 1.208, -0.728, -0.807, 4.557]],
+[0.535, [-0.284, 0.508, -0.453, -0.807, 1.508, 1.208, -0.728, -0.807, 4.557]],
+//就位
+[0.540, [-0.08, 0.028, -0.247, -2.136, 0.124, 0.096, -0.316, -2.07, 4.557]],
+[0.545, [-0.08, 0.028, -0.247, -2.136, 0.124, 0.096, -0.316, -2.07, 4.557]],
+
+//左起右起
+[0.555, [-1.508, -1.208, -0.728, -0.807, 1.508, 1.208, -0.728, -0.807, 5.3165]],
+[0.560, [-1.508, -1.208, -0.728, -0.807, 1.508, 1.208, -0.728, -0.807, 5.3165]],
+//左打右打
+[0.570, [-0.284, 0.508, -0.453, -0.807, 0.284, -0.508, -0.453, -0.807, 5.3165]],
+[0.575, [-0.284, 0.508, -0.453, -0.807, 0.284, -0.508, -0.453, -0.807, 5.3165]],
+
+//轉
+[0.585, [-1.508, -1.208, -0.728, -0.807, 1.508, 1.208, -0.728, -0.807, 6.076]],
+[0.590, [-1.508, -1.208, -0.728, -0.807, 1.508, 1.208, -0.728, -0.807, 6.076]],
+//左打右打
+[0.600, [-0.284, 0.508, -0.453, -0.807, 0.284, -0.508, -0.453, -0.807, 4.557]],
+[0.605, [-0.284, 0.508, -0.453, -0.807, 0.284, -0.508, -0.453, -0.807, 4.557]],
+//左起右起
+[0.608, [-1.508, -1.208, -0.728, -0.807, 1.508, 1.208, -0.728, -0.807, 4.557]],
+[0.612, [-1.508, -1.208, -0.728, -0.807, 1.508, 1.208, -0.728, -0.807, 4.557]],
+
+
+//左起右打
+[0.615, [-0.284, 0.508, -0.453, -0.807, 1.508, 1.208, -0.728, -0.807, 4.557]],
+[0.620, [-0.284, 0.508, -0.453, -0.807, 1.508, 1.208, -0.728, -0.807, 4.557]],
+
+//左打右起
+[0.630, [-1.508, -1.208, -0.728, -0.807, 0.284, -0.508, -0.453, -0.807, 4.557]],
+[0.635, [-1.508, -1.208, -0.728, -0.807, 0.284, -0.508, -0.453, -0.807, 4.557]],
+//左起右起
+[0.638, [-0.284, 0.508, -0.453, -0.807, 0.284, -0.508, -0.453, -0.807, 4.557]],
+[0.642, [-0.284, 0.508, -0.453, -0.807, 0.284, -0.508, -0.453, -0.807, 4.557]],
+//左打右打 
+[0.645, [-0.284, 0.508, -0.453, -0.807, 0.284, -0.508, -0.453, -0.807, 4.557]],
+[0.650, [-0.284, 0.508, -0.453, -0.807, 0.284, -0.508, -0.453, -0.807, 4.557]],
+
+
+[1, [-0.284, 0.508, -0.453, -0.807, 0.124, 0.096, -0.316, -2.07, 1.519]],
+];
+
+var T = 50;
+var clock = new THREE.Clock();
+var ts = clock.getElapsedTime();
+var intKey=[];
+
+/////////////////////////////////////////////////////
+
+init();
+animate();
+
+
+function init() {
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+
+  renderer = new THREE.WebGLRenderer({
+    antialias: true
+  });
+  renderer.setSize(width, height);
+  renderer.setClearColor(0x888888);
+
+  document.body.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+
+  camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 10000);
+  camera.position.y = 160;
+  camera.position.z = 400;
+  camera.lookAt(new THREE.Vector3(0, 0, 0));
+  scene.add(camera);
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+	///////////////////////////////////////////////////////////
+  
+  var boxGeometry = new THREE.BoxGeometry(50, 100, 30);
+  torso = new THREE.Object3D();
+  var bodyMesh = new THREE.Mesh(boxGeometry, new THREE.MeshNormalMaterial());
+  bodyMesh.position.set(0, 50, 0);
+  torso.add(bodyMesh);
+  scene.add(torso);
+  //torso.position.set(0, 0, -35);
+	
+  //drum
+  drum = new THREE.Mesh(new THREE.CylinderGeometry(40, 40, 15, 300), new THREE.MeshNormalMaterial());
+  torso.add(drum);
+  drum.rotation.z = Math.PI/2;
+  drum.position.set(0,60,55);
+  //drum--
+  
+  
+  //head
+  head = new THREE.Mesh(new THREE.BoxGeometry(35, 35, 35), new THREE.MeshNormalMaterial());
+  torso.add(head);
+  head.position.set(0,117.5,0);
+  //head--
+  
+  
+  var boxGeometry = new THREE.BoxGeometry(10, 40, 10);
+  var arm = new THREE.Mesh(boxGeometry, new THREE.MeshNormalMaterial());
+  upperArm = new THREE.Object3D();
+  upperArm.add(arm);
+  
+  //LeftArm
+  var leftArm = new THREE.Mesh(boxGeometry, new THREE.MeshNormalMaterial());
+  leftUpperArm = new THREE.Object3D();
+  leftUpperArm.add(leftArm);
+  //LeftArm--
+  
+  arm.position.set(-5, -20, 0);
+  torso.add(upperArm);
+  
+  //LeftArm
+  leftArm.position.set(5, -20, 0);
+  torso.add(leftUpperArm);
+  //LeftArm--
+  
+  upperArm.position.set(-25, 100, 0);
+	//LeftArm
+  leftUpperArm.position.set(25, 100, 0);
+  //LeftArm--
+  
+  
+  //legL
+  legL = new THREE.Mesh(new THREE.BoxGeometry(10, 50, 10), new THREE.MeshNormalMaterial());
+  torso.add(legL);
+  legL.position.x += 12.5;
+ 	legL.position.y -= 25;
+  
+  //legL--
+  
+  
+  
+  
+  boxGeometry = new THREE.BoxGeometry(10, 40, 10);
+  arm2 = new THREE.Mesh(boxGeometry, new THREE.MeshNormalMaterial());
+  lowerArm = new THREE.Object3D();
+  lowerArm.position.set(0, -40, 0);
+  upperArm.add(lowerArm);
+  lowerArm.add(arm2);
+  arm2.position.set(-5, -20, 0);
+	
+  stickR = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 30, 20), new THREE.MeshNormalMaterial());
+  lowerArm.add(stickR);
+  stickR.rotation.x = Math.PI/2;
+  stickR.position.x -= 5;
+  stickR.position.y -= 40-3;
+  stickR.position.z += 5+30/2;
+  
+  
+  //legR
+  legR = new THREE.Mesh(new THREE.BoxGeometry(10, 50, 10), new THREE.MeshNormalMaterial());
+  torso.add(legR);
+  legR.position.x -= 12.5;
+ 	legR.position.y -= 25;
+  
+  //legR--
+  
+  
+	//LeftArm
+	leftArm2 = new THREE.Mesh(boxGeometry, new THREE.MeshNormalMaterial());
+  leftLowerArm = new THREE.Object3D();
+  leftLowerArm.position.set(0, -40, 0);
+  leftUpperArm.add(leftLowerArm);
+  leftLowerArm.add(leftArm2);
+  leftArm2.position.set(5, -20, 0);
+	//LeftArm
+  stickL = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 30, 20), new THREE.MeshNormalMaterial());
+	leftLowerArm.add(stickL);
+	stickL.rotation.x = Math.PI/2;
+  stickL.position.x += 5;
+  stickL.position.y -= 40-3;
+  stickL.position.z += 5+30/2;
+  
+  
+  torso.position.y += 50;
+  
+
+  var gridXZ = new THREE.GridHelper(100, 10);
+  gridXZ.setColors(new THREE.Color(0xff0000), new THREE.Color(0xffffff));
+  scene.add(gridXZ);
+
+	window.addEventListener('resize', onWindowResize, false);
+  ///////////////////////////////////////////////////
+  gcontrols = {
+  	shoulderZ: 0.01,
+    shoulderY: 0.1,
+    shoulderX: 0.1,
+    elbowX: 0.1,
+    leftShoulderZ: 0.01,
+    leftShoulderY: 0.1,
+    leftShoulderX: 0.1,
+    leftElbowX: 0.1,
+    torsoY: 0.1
+  };
+  
+  gui = new dat.GUI({load: loadJSON(), preset:'Default'});
+  gui.remember (gcontrols);
+  
+  gui.domElement.id = 'gui';
+  gui.add (gcontrols, 'shoulderZ', -3.14, 3);
+  gui.add (gcontrols, 'shoulderY', -3.2, 3);
+  gui.add (gcontrols, 'shoulderX', -3.2, 3);
+  gui.add (gcontrols, 'elbowX', -3, 3);
+  gui.add (gcontrols, 'leftShoulderZ', -3.14, 3);
+  gui.add (gcontrols, 'leftShoulderY', -3.2, 3);
+  gui.add (gcontrols, 'leftShoulderX', -3.2, 3);
+  gui.add (gcontrols, 'leftElbowX', -3, 3);
+	gui.add (gcontrols, 'torsoY', -3,3);
+
+}
+
+function loadJSON() {
+	return {
+  "preset": "Default",
+  "closed": false,
+  "remembered": {
+    "Default": {  // for X.XX display
+      "0": {
+        "shoulderZ": 0.01,
+        "shoulderY": 0.01,
+        "shoulderX": 0.01,
+        "elbowX": 0.01,
+        "leftShoulderZ": 0.01,
+        "leftShoulderY": 0.01,
+        "leftShoulderX": 0.01,
+        "leftElbowX": 0.01,
+        "torsoY": 0.01
+      }
+    },
+    "standby": {
+      "0": {
+        "shoulderZ": -.157,
+        "shoulderY": -.05,
+        "shoulderX": -.39,
+        "elbowX": -1.68,
+        "leftShoulderZ": +.157,
+        "leftShoulderY": -.05,
+        "leftShoulderX": -.39,
+        "leftElbowX": -1.68,
+        "torsoY": 0
+      }
+    },
+    "start": {
+      "0": {
+        "shoulderZ": -0.42823141014175103,
+        "shoulderY": -1.625495924618134,
+        "shoulderX": 0.496661742200903,
+        "elbowX": -2.01,
+        "leftShoulderZ": +0.42823141014175103,
+        "leftShoulderY": -1.625495924618134,
+        "leftShoulderX": 0.496661742200903,
+        "leftElbowX": -2.01,
+        "torsoY": 1.586
+      }
+    }
+  },
+  "folders": {}
+  }
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  update();
+  render();
+}
+
+function update() {
+  controls.update();
+  
+  keyframe(clock.getElapsedTime());
+	
+}
+
+function onWindowResize() {
+  var width = window.innerWidth,
+    height = window.innerHeight;
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height);
+}
+
+function keyframe (t) {
+	var s = ((t - ts)%T)/T;
+  console.log (s);
+  
+  for (var i = 0; i < keys.length; i++) {
+  	if (keys[i][0] > s) break;
+  }
+  
+  // take i-1
+  var ii = i-1;
+  var a = (s - keys[ii][0]) / (keys[ii+1][0] - keys[ii][0]);
+  intKey = []
+  for (var j = 0; j < 9; j++) {
+  	intKey.push (keys[ii][1][j] * (1-a) + keys[ii+1][1][j]*a);
+  }
+  
+  
+  //console.log (intKey);
+  
+}
+
+
+
+function render() {
+  upperArm.rotation.order = 'ZXY';
+	/*
+  upperArm.rotation.z = gcontrols.shoulderZ; 
+  upperArm.rotation.y = gcontrols.shoulderY; 
+  upperArm.rotation.x = gcontrols.shoulderX; 
+
+  lowerArm.rotation.x = gcontrols.elbowX; 
+  
+  */
+  leftUpperArm.rotation.order = 'ZXY';
+	/*
+  leftUpperArm.rotation.z = gcontrols.leftShoulderZ; 
+  leftUpperArm.rotation.y = gcontrols.leftShoulderY; 
+  leftUpperArm.rotation.x = gcontrols.leftShoulderX; 
+
+  leftLowerArm.rotation.x = gcontrols.leftElbowX; 
+
+  torso.rotation.y = gcontrols.torsoY;
+*/
+  upperArm.rotation.z = intKey[0]; 
+  upperArm.rotation.y = intKey[1]; 
+  upperArm.rotation.x = intKey[2]; 
+
+  lowerArm.rotation.x = intKey[3]; 
+  
+  leftUpperArm.rotation.z = intKey[4];
+  leftUpperArm.rotation.y = intKey[5];
+  leftUpperArm.rotation.x = intKey[6];
+
+  leftLowerArm.rotation.x = intKey[7];
+  
+  torso.rotation.y = intKey[8];
+
+  renderer.render(scene, camera);
+}
+
+</script>
+</body>
+
+</html>
