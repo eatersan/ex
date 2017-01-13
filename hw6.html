@@ -48,6 +48,7 @@
 <div id="info">
   HW06
   <br>
+  <button id="thtrow" style="width:20%">throw</button>
   <br> 
 </div>
 
@@ -55,12 +56,17 @@
 <script src="https://dl.dropboxusercontent.com/u/3587259/Code/Threejs/OrbitControls.js"></script>
 <script src="https://rawgit.com/jyunming-chen/game3js/master/js/ccdbox.js"></script>
 
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+
 
 <script>
 var scene, renderer, camera;
 var controls;
 var lowerArm, upperArm;
 var clock = new THREE.Clock();
+var dt;
+var target, vel, force;
 
 var sign = 1;
 var zz = 30;
@@ -78,6 +84,15 @@ var joints = [];
 
 init();
 animate();
+
+$("#thtrow").click(
+  function() {
+    target.set(-30, 50, 0);
+    vel.set(0, 0, 25);
+    force.set(0, -10, 0);
+  }
+);
+
 
 ////////////////////////////////////////////////////////
 // forward kinematics
@@ -191,7 +206,13 @@ function init() {
   
   tBox.position.y += 15;
   tBox.position.z += 70;
-  tBox.position.x -= 10;
+  tBox.position.x -= 35;
+  
+  
+  target = new THREE.Vector3(-30, 50, 0);
+  vel = new THREE.Vector3(0, 0, 30);
+  force = new THREE.Vector3(0, -10, 0);
+  
   
   window.addEventListener('resize', onWindowResize, false);
 
@@ -202,6 +223,8 @@ function init() {
 
 
 function animate() {
+	dt = clock.getDelta();
+  
   requestAnimationFrame(animate);
   update();
   render();
@@ -217,10 +240,22 @@ function update() {
 	if (zz > 100 || zz < -20) sign *= -1;
   zz += sign*2;
   
-	var target = new THREE.Vector3(-30, 35, zz); //-70, 150, -30); //70+r*Math.cos(dt),20+r*Math.sin(dt),20);
+  
+  vel.add(force.clone().multiplyScalar(dt));
+  target.add(vel.clone().multiplyScalar(dt));
+  
+  
+	//var target = new THREE.Vector3(-30, 35, zz); //-70, 150, -30); //70+r*Math.cos(dt),20+r*Math.sin(dt),20);
   //console.log (target);
   //	var target = new THREE.Vector3 (70,60,20);
   tsphere.position.copy (target);
+
+
+	if (target.y < 0) {
+    force.y = 0;
+    vel.set(0, 0, 0);
+  }
+
 
   //	var theta = [theta1, theta2, theta3];
   var theta = [0, 0, -1e-2];
@@ -229,6 +264,8 @@ function update() {
   theta2 = theta[1];
   theta3 = theta[2];
   console.log(theta);
+  
+  
  
 // 	theta1 = theta2 = theta3 = 0;
 //  theta1 = -Math.PI/6;  theta2 = -Math.PI/3;  theta3 = -Math.PI/4;
@@ -253,7 +290,6 @@ function render() {
 
   renderer.render(scene, camera);
 }
-
 
 </script>
 </body>
