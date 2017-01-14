@@ -66,7 +66,17 @@ var controls;
 var lowerArm, upperArm;
 var clock = new THREE.Clock();
 var dt;
+var check;
 var target, vel, force;
+var throwB = false;
+var key_a;
+var key_b;
+var key_c;
+var temp;
+var state = 1;
+
+var t_start = [-40,39,-30];
+var t_end = [-35,48,41];
 
 var sign = 1;
 var zz = 30;
@@ -87,9 +97,17 @@ animate();
 
 $("#thtrow").click(
   function() {
-    target.set(-30, 50, 0);
-    vel.set(0, 0, 25);
-    force.set(0, -10, 0);
+  	t_end[0] = gcontrols.X;
+    t_end[1] = gcontrols.Y;
+    t_end[2] = gcontrols.Z;
+    target.set(gcontrols.X, gcontrols.Y, gcontrols.Z);
+    
+    temp = new THREE.Vector3(t_end[0] - t_start[0], t_end[1] - t_start[1], t_end[2] - t_start[2]);
+    temp.normalize();
+    
+    //target.set(-30, 50, 0);
+    
+    throwB = true;
   }
 );
 
@@ -193,7 +211,7 @@ function init() {
   lowerArm.add(arm2);
   arm2.position.set(-5, -30, 0);
 
-  var gridXZ = new THREE.GridHelper(100, 10);
+  var gridXZ = new THREE.GridHelper(300, 10);
   gridXZ.setColors(new THREE.Color(0xff0000), new THREE.Color(0xffffff));
   scene.add(gridXZ);
   
@@ -205,13 +223,31 @@ function init() {
   scene.add (tBox);
   
   tBox.position.y += 15;
-  tBox.position.z += 70;
+  tBox.position.z += 140;
   tBox.position.x -= 35;
   
   
   target = new THREE.Vector3(-30, 50, 0);
-  vel = new THREE.Vector3(0, 0, 30);
+  vel = new THREE.Vector3(0, 0, 25);
   force = new THREE.Vector3(0, -10, 0);
+  check =  new THREE.Vector3(0, 0, 0);
+  
+  
+  
+  
+  
+   gcontrols = {
+	    X: -40,
+	    Y: 55,
+	    Z: -10,
+	  };
+
+	  var gui = new dat.GUI();
+	  gui.domElement.id = 'gui';
+
+	  gui.add(gcontrols, 'X', -80, -25);
+	  gui.add(gcontrols, 'Y', 20, 100);
+	  gui.add(gcontrols, 'Z', -30, 100);
   
   
   window.addEventListener('resize', onWindowResize, false);
@@ -243,6 +279,40 @@ function update() {
   
   vel.add(force.clone().multiplyScalar(dt));
   target.add(vel.clone().multiplyScalar(dt));
+  //////////////////////
+  if(throwB){
+  	if(state==1){
+    	target.sub(temp.clone().multiplyScalar(1));
+      check.set(target.x - t_start[0],target.y - t_start[1],target.z - t_start[2])
+      
+      if(check.dot(temp.clone()) < 0){
+      	target.set(t_start[0],t_start[1],t_start[2]);
+      	state = 2;
+      }
+    }
+    else if(state==2){
+    	target.add(temp.clone().multiplyScalar(1));
+      check.set(target.x - t_end[0],target.y - t_end[1],target.z - t_end[2])
+      
+      if(check.dot(temp.clone()) > 0){
+      	target.set(t_end[0],t_end[1],t_end[2]);
+      	state = 3;
+      }
+    }
+    else if(state==3){
+    	vel.add(temp.clone().multiplyScalar(40));
+    	force.set(0, -10, 0);
+      state = 4;
+    }
+    else if(state==4){
+    	vel.add(force.clone().multiplyScalar(dt));
+  		target.add(vel.clone().multiplyScalar(dt));
+    }
+  }
+  else{
+  	target.set(gcontrols.X, gcontrols.Y, gcontrols.Z);
+  }
+  
   
   
 	//var target = new THREE.Vector3(-30, 35, zz); //-70, 150, -30); //70+r*Math.cos(dt),20+r*Math.sin(dt),20);
@@ -255,7 +325,14 @@ function update() {
     force.y = 0;
     vel.set(0, 0, 0);
   }
-
+	console.log(target.x);
+  console.log(target.y);
+  console.log(target.z);
+  console.log("state = " + state);
+  
+    console.log(temp);
+	console.log("start = " + t_start);
+	console.log("end = " + t_end);
 
   //	var theta = [theta1, theta2, theta3];
   var theta = [0, 0, -1e-2];
@@ -263,7 +340,7 @@ function update() {
   theta1 = theta[0];
   theta2 = theta[1];
   theta3 = theta[2];
-  console.log(theta);
+  //console.log(theta);
   
   
  
@@ -290,6 +367,7 @@ function render() {
 
   renderer.render(scene, camera);
 }
+
 
 </script>
 </body>
